@@ -18,7 +18,12 @@ Think of it as a super-lightweight cousin of *neofetch/fastfetch* — but way si
 All you need is a C compiler.
 
 ```bash
+<<<<<<< HEAD
 git clone https://github.com/lyciv/xFetch
 cd xFetch
+=======
+git clone https://github.com/<username>/xfetch.git
+cd xfetch
+>>>>>>> 8b791af (initial source code upload)
 make
 ./xfetch
