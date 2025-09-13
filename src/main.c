@@ -32,30 +32,55 @@ typedef struct {
     int minimal;
 } uf_options_t;
 
+// declare dummy global opts here
+uf_options_t opts;
+// forward declaration
+// forward declare
+static void kv(const char* label, const char* value, uf_options_t* opts, const char* icon_type);
 
-static void print_logo(void) {
-    FILE *f = fopen("logos/xFetch.txt", "r");
-    if (!f) return;
+static void kv_silent(const char* label, char* out, uf_options_t* opts, const char* icon_type){
+    if(!out) return;
+    // manggil kv asli tapi buang outputnya
+    fflush(stdout);
+    int fd = dup(fileno(stdout));
+    freopen("/dev/null", "w", stdout);     // redirect stdout sementara
+    kv(label, out, opts, icon_type);       // ini akan ngisi buffer + print (tapi ke /dev/null)
+    fflush(stdout);
+    dup2(fd, fileno(stdout));              // restore stdout
+    close(fd);
+}
 
-    char line[512];
-    const char *colors[] = {
-        "\033[1;31m", // merah
-        "\033[1;33m", // kuning
-        "\033[1;32m", // hijau
-        "\033[1;36m", // cyan
-        "\033[1;34m", // biru
-        "\033[1;35m"  // ungu
-    };
-    int ncolors = sizeof(colors) / sizeof(colors[0]);
-    int i = 0;
+static void print_logo(void){
+    char s_os[128] = {0};
+    os_string(s_os, sizeof(s_os));   // ambil OS string asli, bukan kv()
 
-    while (fgets(line, sizeof(line), f)) {
-        printf("%s%s\033[0m", colors[i % ncolors], line);
+    char name[64] = {0};
+    int j = 0;
+    for(char *p = s_os; *p && j < (int)sizeof(name) - 1; p++){
+        if(*p==' '||*p=='\t') break;
+        char c=*p;
+        if(c>='A'&&c<='Z') c=(char)(c-'A'+'a');
+        name[j++]=c;
+    }
+    name[j]=0;
+
+    char path[256];
+    snprintf(path,sizeof(path),"logos/%s.txt",*name?name:"xFetch");
+
+    FILE*f=fopen(path,"r");
+    if(!f) f=fopen("logos/xFetch.txt","r");
+    if(!f) return;
+
+    int rainbow[]={196,202,208,214,220,226,190,82,46,49,51,39,33,27,93,129,201,198};
+    int rlen=sizeof(rainbow)/sizeof(rainbow[0]);
+    char line[512];int i=0;
+    while(fgets(line,sizeof(line),f)){
+        printf("\033[38;5;%dm%s\033[0m",rainbow[i%rlen],line);
         i++;
     }
-
     fclose(f);
 }
+
 
 static const char* get_icon(const char* type) {
     if (strcmp(type, "os") == 0) return "🖥️  ";
