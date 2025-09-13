@@ -32,12 +32,29 @@ typedef struct {
     int minimal;
 } uf_options_t;
 
-static void print_logo(void){
-    printf("      _____\n");
-    printf("  __ /  *  \\ *_\n");
-    printf(" / /_| |_| |/ /\n");
-    printf("/ ___  _  // /\n");
-    printf("\\_\\  |_| |/_/\n");
+
+static void print_logo(void) {
+    FILE *f = fopen("logos/xFetch.txt", "r");
+    if (!f) return;
+
+    char line[512];
+    const char *colors[] = {
+        "\033[1;31m", // merah
+        "\033[1;33m", // kuning
+        "\033[1;32m", // hijau
+        "\033[1;36m", // cyan
+        "\033[1;34m", // biru
+        "\033[1;35m"  // ungu
+    };
+    int ncolors = sizeof(colors) / sizeof(colors[0]);
+    int i = 0;
+
+    while (fgets(line, sizeof(line), f)) {
+        printf("%s%s\033[0m", colors[i % ncolors], line);
+        i++;
+    }
+
+    fclose(f);
 }
 
 static const char* get_icon(const char* type) {
